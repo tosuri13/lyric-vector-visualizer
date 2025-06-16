@@ -1,4 +1,5 @@
 import pickle
+from pathlib import Path
 
 import numpy as np
 from openai import OpenAI
@@ -17,16 +18,19 @@ if __name__ == "__main__":
 
         return embedding
 
-    with open("assets/lyrics/Defying Gravity.txt", "r") as f:
-        lyrics = f.read().splitlines()
-        lyrics = [lyric for lyric in lyrics if lyric.strip()]
+    for path in Path("assets/lyrics").glob("*.txt"):
+        with open(path, "r") as f:
+            lyrics = f.read().splitlines()
+            lyrics = [lyric for lyric in lyrics if lyric.strip()]
 
-    vectors = [embed(lyric) for lyric in lyrics]
-    vectors = np.stack(vectors)
+        song = path.stem
 
-    np.save("assets/vectors.npy", vectors)
+        vectors = [embed(lyric) for lyric in lyrics]
+        vectors = np.stack(vectors)
 
-    metadata = [[lyric] for lyric in lyrics]
+        np.save(f"assets/vectors/{song}.npy", vectors)
 
-    with open("assets/metadata.pkl", "wb") as f:
-        pickle.dump(metadata, f)
+        metadata = [[lyric, song] for lyric in lyrics]
+
+        with open(f"assets/metadata/{song}.pkl", "wb") as f:
+            pickle.dump(metadata, f)
