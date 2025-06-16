@@ -19,11 +19,15 @@ if __name__ == "__main__":
         return embedding
 
     for path in Path("assets/lyrics").glob("*.txt"):
+        song = path.stem
+
+        # NOTE: 既に処理済みの歌詞はベクトル化・メタデータ化しない
+        if Path(f"assets/vectors/{song}.npy").exists():
+            continue
+
         with open(path, "r") as f:
             lyrics = f.read().splitlines()
             lyrics = [lyric for lyric in lyrics if lyric.strip()]
-
-        song = path.stem
 
         vectors = [embed(lyric) for lyric in lyrics]
         vectors = np.stack(vectors)
